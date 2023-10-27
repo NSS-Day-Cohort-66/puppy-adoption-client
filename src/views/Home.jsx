@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { Agency } from "../components/Agency.jsx"
-import { fetchIt } from "../utils/fetchIt.js"
 
 export const HomeView = () => {
     const [allCenters, setCentersArray] = useState([])
@@ -9,12 +7,14 @@ export const HomeView = () => {
     const [error, setError] = useState(false)
 
     const fetchAgencies = async () => {
-        const fetchInfo = await fetchIt("http://localhost:8000/agencies")
+        try {
+            const agencies = await fetch("http://localhost:8000/agencies")
+            const data = await agencies.json()
+            setCentersArray(data)
 
-        if (fetchInfo.success) {
-            setCentersArray(fetchInfo.data)
+        } catch (error) {
+            setError(true)
         }
-
         setLoading(false)
     }
 
@@ -23,26 +23,33 @@ export const HomeView = () => {
         fetchAgencies()
     }, [])
 
-    const displayAgenciesOrError = () => {
-        if (error) {
-            return <div className="p-5 bg-red-700 text-white text-lg">Error loading data. Please try again.</div>
-        }
-
-        return allCenters.map(center => <Agency center={center} /> )
-    }
-
-    const showLoadingOrData = () => {
-        if (loading) {
-            return <div className="p-5 bg-yellow-500 text-black text-lg">Loading data. Please wait...</div>
-        }
-
-        return displayAgenciesOrError()
-    }
-
     return (
         <>
             <h2>Buford County Adoption Centers</h2>
-            { showLoadingOrData() }
+            {
+                loading
+                    ? <div className="p-5 bg-yellow-500 text-black text-lg">Loading data. Please wait...</div>
+                    : error
+                        ? <div className="p-5 bg-red-700 text-white text-lg">Error loading data. Please try again.</div>
+                        : allCenters.map(center => <section className="flex justify-around border border-fuchsia-900 p-8 mt-4 mb-4 bg-yellow-400"
+                            key={`center-${center.id}`}>
+                            <div className="flex-1">
+                                <Link to={`/centers/${center.id}`}
+                                    className="text-blue-600 underline hover:text-blue-900"
+                                >
+                                    {center.name}
+                                </Link>
+                            </div>
+                            <div className="flex-1">
+                                {center.address}
+                            </div>
+                            <div className="flex-1 flex items-center justify-center">
+                                {center.number_of_puppies}
+                            </div>
+                        </section>
+                        )
+
+            }
         </>
     )
 }
