@@ -7,19 +7,13 @@ export const HomeView = () => {
     const [error, setError] = useState(false)
 
     const fetchAgencies = async () => {
-        try {
-            const agencies = await fetch("http://localhost:8000/agencies")
-            if (!agencies.ok) {
-                setLoading(false)
-                return setError(true)
-            }
-            const data = await agencies.json()
+        const { requestFailed, data } = await robustFetch("http://localhost:8000/agencies")
+        if (!requestFailed) {
             setCentersArray(data)
-
-        } catch (error) {
+        }
+        else {
             setError(true)
         }
-        setLoading(false)
     }
 
     useEffect(() => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
+import { robustFetch } from "../services/services.js"
 
 export const PuppyList = () => {
     const [agency, setAgency] = useState({ puppies:[] })
@@ -9,19 +10,13 @@ export const PuppyList = () => {
     const { centerId } = useParams()
 
     const fetchAgency = async () => {
-        try {
-            const agency = await fetch(`http://localhost:8000/agencies/${centerId}`)
-            if (!agency.ok) {
-                setLoading(false)
-                return setError(true)
-            }
-            const data = await agency.json()
+        const { requestFailed, data } = await robustFetch(`http://localhost:8000/agencies/${centerId}`)
+        if (!requestFailed) {
             setAgency(data)
-
-        } catch (error) {
+        }
+        else {
             setError(true)
         }
-        setLoading(false)
     }
 
     useEffect(() => {
