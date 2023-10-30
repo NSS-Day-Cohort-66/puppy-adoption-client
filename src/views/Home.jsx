@@ -9,6 +9,10 @@ export const HomeView = () => {
     const fetchAgencies = async () => {
         try {
             const agencies = await fetch("http://localhost:8000/agencies")
+            if (!agencies.ok) {
+                setLoading(false)
+                return setError(true)
+            }
             const data = await agencies.json()
             setCentersArray(data)
 
